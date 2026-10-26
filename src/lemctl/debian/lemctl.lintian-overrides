@@ -1,0 +1,5 @@
+# Intentionally built with CGO_ENABLED=0: this Go CLI does not link libc.
+# Keep the binary independent of the target image's libc version.
+# Linked Go module and toolchain notices accompany the binary; updates to
+# those components require rebuilding this package.
+lemctl binary: statically-linked-binary [usr/bin/lemctl]

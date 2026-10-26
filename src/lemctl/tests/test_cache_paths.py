@@ -46,6 +46,7 @@ class CachePathsTest(unittest.TestCase):
             "patches/0001-luciusctl-transport-policy.patch",
             "collect-notices.py",
             "debian/copyright",
+            "debian/lemctl.lintian-overrides",
         ):
             self.assertIn(str(platform / "src/lemctl" / name), paths)
 

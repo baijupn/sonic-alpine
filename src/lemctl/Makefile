@@ -17,12 +17,13 @@ lemctl:
 	mkdir -p "$(BUILD_DIR)"
 	git -C "$(LEMMING_SOURCE)" archive HEAD | tar -x -C "$(BUILD_DIR)"
 	cd "$(BUILD_DIR)" && patch --batch --forward --fuzz=0 -p1 < "$(CURDIR)/patches/0001-luciusctl-transport-policy.patch"
-	cd "$(BUILD_DIR)" && CGO_ENABLED=1 GOOS=linux GOARCH=$(GOARCH) go build -buildvcs=false -trimpath -ldflags="-s -w" -o "$(CURDIR)/lemctl" ./cmd/lemctl
-	cd "$(BUILD_DIR)" && CGO_ENABLED=1 GOOS=linux GOARCH=$(GOARCH) python3 "$(CURDIR)/collect-notices.py" "$(CURDIR)/THIRD_PARTY_NOTICES"
+	cd "$(BUILD_DIR)" && CGO_ENABLED=0 GOOS=linux GOARCH=$(GOARCH) go build -buildvcs=false -trimpath -ldflags="-s -w" -o "$(CURDIR)/lemctl" ./cmd/lemctl
+	cd "$(BUILD_DIR)" && CGO_ENABLED=0 GOOS=linux GOARCH=$(GOARCH) python3 "$(CURDIR)/collect-notices.py" "$(CURDIR)/THIRD_PARTY_NOTICES"
 
 test:
 	python3 -m unittest discover -s tests -p 'test_*.py'
 	cd "$(BUILD_DIR)" && go test -count=1 ./dataplane/luciusctl/...
+	bash ./tests/test-static-binary.sh ./lemctl
 	./tests/test-binary.sh ./lemctl
 
 install:

@@ -23,6 +23,13 @@ The package includes generated dependency and Go toolchain notices in
 `/usr/share/lemctl/THIRD_PARTY_NOTICES`, outside the documentation directory
 pruned by SONiC's container cleanup.
 Missing license texts fail the build.
+The release binary uses `CGO_ENABLED=0` to avoid a target libc dependency.
+It uses Go's resolver rather than libc/NSS; environments needing custom NSS
+modules should account for that difference. Certificates still use the system
+CA bundle, supplemented by `--tls_ca_cert` when supplied.
+The package carries a documented, binary-specific Lintian exception for
+intentional static linking. Linked Go dependencies and the toolchain are
+updated by rebuilding the package, not by replacing shared libraries.
 
 The temporary patch in `src/lemctl/patches` tracks
 [Lemming PR #754](https://github.com/openconfig/lemming/pull/754). Remove it when

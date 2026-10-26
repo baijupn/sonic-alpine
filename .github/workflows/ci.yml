@@ -95,6 +95,7 @@ jobs:
           cd src/lemctl
           dpkg-buildpackage -us -uc -b -tc
           dpkg-deb -x ../lemctl_1.0-1_amd64.deb package-test
+          bash ./tests/test-static-binary.sh ./package-test/usr/bin/lemctl
           ./tests/test-binary.sh ./package-test/usr/bin/lemctl
           grep -F "Go toolchain" package-test/usr/share/lemctl/THIRD_PARTY_NOTICES
           grep -F "github.com/spf13/viper" package-test/usr/share/lemctl/THIRD_PARTY_NOTICES
@@ -102,6 +103,7 @@ jobs:
       - name: Verify installed package
         run: |
           apt-get install -y ./src/lemctl_1.0-1_amd64.deb
+          bash src/lemctl/tests/test-static-binary.sh /usr/bin/lemctl
           src/lemctl/tests/test-binary.sh /usr/bin/lemctl
           grep -F "Go toolchain" /usr/share/lemctl/THIRD_PARTY_NOTICES
       - uses: actions/upload-artifact@v4

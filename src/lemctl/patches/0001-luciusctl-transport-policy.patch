@@ -26,54 +26,6 @@ index 9168d7c..b77c1a0 100644
  To enable packet traces, the lucius containers must be logging at level 3 or
  higher. Add the "-v=3" arg in the topology file for all lucius containers.
  
-diff --git a/dataplane/luciusctl/BUILD b/dataplane/luciusctl/BUILD
-index 502105d..fed91dd 100644
---- a/dataplane/luciusctl/BUILD
-+++ b/dataplane/luciusctl/BUILD
-@@ -1,4 +1,4 @@
--load("@io_bazel_rules_go//go:def.bzl", "go_library")
-+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
- 
- go_library(
-     name = "luciusctl",
-@@ -12,3 +12,20 @@ go_library(
-         "@com_github_spf13_viper//:viper",
-     ],
- )
-+
-+go_test(
-+    name = "luciusctl_test",
-+    size = "small",
-+    srcs = ["luciusctl_test.go"],
-+    embed = [":luciusctl"],
-+    deps = [
-+        "//dataplane/proto/sai",
-+        "//proto/forwarding",
-+        "@com_github_spf13_cobra//:cobra",
-+        "@com_github_spf13_viper//:viper",
-+        "@org_golang_google_grpc//:grpc",
-+        "@org_golang_google_grpc//credentials",
-+        "@org_golang_google_grpc//peer",
-+        "@org_golang_google_grpc//reflection",
-+    ],
-+)
-diff --git a/dataplane/luciusctl/info/BUILD b/dataplane/luciusctl/info/BUILD
-index 8ccecc7..6d6e32a 100644
---- a/dataplane/luciusctl/info/BUILD
-+++ b/dataplane/luciusctl/info/BUILD
-@@ -6,11 +6,8 @@ go_library(
-     importpath = "github.com/openconfig/lemming/dataplane/luciusctl/info",
-     visibility = ["//visibility:public"],
-     deps = [
-+        "//dataplane/luciusctl/internal/transport",
-         "//proto/forwarding",
-         "@com_github_spf13_cobra//:cobra",
--        "@com_github_spf13_viper//:viper",
--        "@org_golang_google_grpc//:grpc",
--        "@org_golang_google_grpc//credentials",
--        "@org_golang_google_grpc//credentials/insecure",
-     ],
- )
 diff --git a/dataplane/luciusctl/info/info.go b/dataplane/luciusctl/info/info.go
 index 5efa9dc..34ffc23 100644
 --- a/dataplane/luciusctl/info/info.go
@@ -133,34 +85,6 @@ index 5efa9dc..34ffc23 100644
 -
 -	return grpc.NewClient(viper.GetString("address"), opts)
 -}
-diff --git a/dataplane/luciusctl/internal/transport/BUILD b/dataplane/luciusctl/internal/transport/BUILD
-new file mode 100644
-index 0000000..eb809b2
---- /dev/null
-+++ b/dataplane/luciusctl/internal/transport/BUILD
-@@ -0,0 +1,22 @@
-+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
-+
-+go_library(
-+    name = "transport",
-+    srcs = ["transport.go"],
-+    importpath = "github.com/openconfig/lemming/dataplane/luciusctl/internal/transport",
-+    visibility = ["//dataplane/luciusctl:__subpackages__"],
-+    deps = [
-+        "@com_github_spf13_viper//:viper",
-+        "@org_golang_google_grpc//:grpc",
-+        "@org_golang_google_grpc//credentials",
-+        "@org_golang_google_grpc//credentials/insecure",
-+    ],
-+)
-+
-+go_test(
-+    name = "transport_test",
-+    size = "small",
-+    srcs = ["transport_test.go"],
-+    embed = [":transport"],
-+    deps = ["@com_github_spf13_viper//:viper"],
-+)
 diff --git a/dataplane/luciusctl/internal/transport/transport.go b/dataplane/luciusctl/internal/transport/transport.go
 new file mode 100644
 index 0000000..fba2b07
@@ -728,23 +652,6 @@ index 0000000..3f4c144
 +		})
 +	}
 +}
-diff --git a/dataplane/luciusctl/sai/BUILD b/dataplane/luciusctl/sai/BUILD
-index 6275ad7..ebc4f34 100644
---- a/dataplane/luciusctl/sai/BUILD
-+++ b/dataplane/luciusctl/sai/BUILD
-@@ -9,11 +9,8 @@ go_library(
-     importpath = "github.com/openconfig/lemming/dataplane/luciusctl/sai",
-     visibility = ["//visibility:public"],
-     deps = [
-+        "//dataplane/luciusctl/internal/transport",
-         "@com_github_spf13_cobra//:cobra",
--        "@com_github_spf13_viper//:viper",
--        "@org_golang_google_grpc//:grpc",
--        "@org_golang_google_grpc//credentials",
--        "@org_golang_google_grpc//credentials/insecure",
-         "@org_golang_google_grpc//reflection/grpc_reflection_v1",
-         "@org_golang_google_protobuf//encoding/prototext",
-         "@org_golang_google_protobuf//proto",
 diff --git a/dataplane/luciusctl/sai/sai.go b/dataplane/luciusctl/sai/sai.go
 index a19ed39..655edee 100644
 --- a/dataplane/luciusctl/sai/sai.go
